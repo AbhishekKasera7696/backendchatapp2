@@ -18,12 +18,12 @@ require('./connection');
 const server = require('http').createServer(app);
 const PORT = process.env.PORT || 5001;
 
-const io = require('socket.io')(server, {
-    cors: {
-        origin : 'https://abhishekchatapp.netlify.app' ||'http://localhost:3000',
-        methods: ['GET', 'POST']
-    }
-});
+// const io = require('socket.io')(server, {
+//     cors: {
+//         origin : 'https://abhishekchatapp.netlify.app' ||'http://localhost:3000',
+//         methods: ['GET', 'POST']
+//     }
+// });
 
 app.get('/', (req,res)=> {
     res.send("backend is running")
@@ -55,56 +55,56 @@ function sortRoomMessagesByDate(messages) {
 }
 
 //socket connection
-io.on('connection', (socket) => {
+// io.on('connection', (socket) => {
 
-    socket.on('new-user', async () => {
-        const members = await User.find();
-        // console.log(members)
-        io.emit('new-user', members);
-    })
+//     socket.on('new-user', async () => {
+//         const members = await User.find();
+//         // console.log(members)
+//         io.emit('new-user', members);
+//     })
 
-    socket.on('join-room', async(newRoom, previousRoom) => {
+//     socket.on('join-room', async(newRoom, previousRoom) => {
 
-        // socket.on('new-user', async () => {
-        //     const members = await User.find();
-        //     // console.log(members)
-        //     io.emit('new-user', members);
-        // })
+//         // socket.on('new-user', async () => {
+//         //     const members = await User.find();
+//         //     // console.log(members)
+//         //     io.emit('new-user', members);
+//         // })
 
 
-        socket.join(newRoom);
-        socket.leave(previousRoom)
-        let roomMessages = await getLastMessageFromRoom(newRoom);
-        roomMessages = sortRoomMessagesByDate(roomMessages);
-        socket.emit('room-messages', roomMessages)
-    })
+//         socket.join(newRoom);
+//         socket.leave(previousRoom)
+//         let roomMessages = await getLastMessageFromRoom(newRoom);
+//         roomMessages = sortRoomMessagesByDate(roomMessages);
+//         socket.emit('room-messages', roomMessages)
+//     })
 
-    socket.on('message-room', async (room, content, time, date, sender) => {
-        console.log('New message', content)
-        const newMessages = await Message.create({content, from: sender, time, date, to: room});
-        let roomMessages = await getLastMessageFromRoom(room);
-        roomMessages = sortRoomMessagesByDate(roomMessages);
-        //sending message to room.
-        io.to(room).emit('room-messages', roomMessages);
-        socket.broadcast.emit('notifications', room)
-    })
+//     socket.on('message-room', async (room, content, time, date, sender) => {
+//         console.log('New message', content)
+//         const newMessages = await Message.create({content, from: sender, time, date, to: room});
+//         let roomMessages = await getLastMessageFromRoom(room);
+//         roomMessages = sortRoomMessagesByDate(roomMessages);
+//         //sending message to room.
+//         io.to(room).emit('room-messages', roomMessages);
+//         socket.broadcast.emit('notifications', room)
+//     })
 
-    app.delete('/logout', async (req, res) => {
-        try {
-            const {_id, newMessages} = req.body;
-            const user = await User.findById(_id);
-            user.status = "offline";
-            user.newMessages = newMessages;
-            await user.save();
-            const members = await User.find();
-            socket.broadcast.emit('new-user', members)
-            res.status(200).send();
-        } catch (e) {
-            console.log(e);
-            res.status(400).send()
-        }
-    })
-})
+//     app.delete('/logout', async (req, res) => {
+//         try {
+//             const {_id, newMessages} = req.body;
+//             const user = await User.findById(_id);
+//             user.status = "offline";
+//             user.newMessages = newMessages;
+//             await user.save();
+//             const members = await User.find();
+//             socket.broadcast.emit('new-user', members)
+//             res.status(200).send();
+//         } catch (e) {
+//             console.log(e);
+//             res.status(400).send()
+//         }
+//     })
+// })
 
 server.listen(PORT, () =>{
     console.log('listening to port' , PORT)
